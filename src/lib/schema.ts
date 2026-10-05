@@ -19,7 +19,6 @@ export function professionalService() {
     url: SITE.url,
     description: SITE.description,
     email: SITE.email,
-    image: new URL(SITE.defaultOgImage, SITE.url).href,
     founder: { '@id': PERSON_ID },
     areaServed: SITE.areaServed.map((name) => ({ '@type': 'Place', name })),
     knowsAbout: [...SITE.tools],
@@ -35,7 +34,6 @@ export function person() {
     url: absoluteUrl('/a-propos'),
     worksFor: { '@id': ORG_ID },
     alumniOf: PERSON.alumniOf.map((name) => ({ '@type': 'EducationalOrganization', name })),
-    knowsAbout: [...SITE.tools],
     // Profils publics officiels : à remplir dans src/config/site.ts (PERSON.sameAs).
     sameAs: [...PERSON.sameAs],
   };
