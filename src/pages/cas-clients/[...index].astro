@@ -1,0 +1,45 @@
+---
+/**
+ * Liste des cas clients, servie à /cas-clients. Générée uniquement s'il existe au moins
+ * un cas client publié : pas de page vide indexée tant que la collection est vide.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getPublished, isoDate } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const cases = (await getPublished('cas-clients')).sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf());
+  return cases.length ? [{ params: { index: undefined }, props: { cases } }] : [];
+}) satisfies GetStaticPaths;
+
+const { cases } = Astro.props;
+---
+
+<BaseLayout
+  title="Cas clients"
+  description="Cas clients de D2matic : projets d'automatisation no-code et low-code réalisés pour des TPE, PME, agences et équipes d'ETI."
+  breadcrumbs={[{ name: 'Cas clients', href: '/cas-clients' }]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <h1 class="text-4xl font-bold tracking-tight">Cas clients</h1>
+    <ul class="mt-8 space-y-8">
+      {
+        cases.map((p) => (
+          <li>
+            <article>
+              <h2 class="text-2xl font-semibold">
+                <a href={`/cas-clients/${p.id}`} class="hover:text-brand-700">
+                  {p.data.title}
+                </a>
+              </h2>
+              <p class="mt-1 text-sm text-slate-600">
+                <time datetime={isoDate(p.data.publishedDate)}>{formatDate(p.data.publishedDate)}</time>
+              </p>
+              <p class="mt-2 text-slate-700">{p.data.description}</p>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>

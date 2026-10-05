@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { PERSON, SITE, hasUrl } from '../config/site';
+import { getPublished } from '../lib/content';
+import { person, professionalService } from '../lib/schema';
+
+const services = (await getPublished('services')).sort((a, b) => a.data.ordre - b.data.ordre);
+const cas = await getPublished('cas-clients');
+const sameAs = PERSON.sameAs.filter(hasUrl);
+---
+
+<BaseLayout
+  title="D2matic, consultant en automatisation no-code et low-code"
+  description={SITE.description}
+  schema={[professionalService(), person()]}
+>
+  <section class="bg-gradient-to-b from-brand-50 to-white">
+    <div class="mx-auto max-w-5xl px-4 py-16 sm:py-24">
+      <p class="text-sm font-semibold uppercase tracking-wide text-brand-700">Make Expert Partner</p>
+      <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
+        D2matic, consultant en automatisation no-code et low-code
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg text-slate-700">
+        Automatisations conformes RGPD pour TPE, PME, agences et équipes opérationnelles d’ETI, en France et en Europe.
+      </p>
+      <p class="mt-4 max-w-2xl text-slate-700">
+        <Placeholder text="proposition de valeur en une ou deux phrases : le problème résolu pour le client" />
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/contact" class="rounded-md bg-brand-700 px-5 py-3 font-semibold text-white hover:bg-brand-800">Me contacter</a>
+        <a href="/services" class="rounded-md border border-slate-300 bg-white px-5 py-3 font-semibold text-ink hover:border-brand-700">
+          Voir les services
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="services" class="mx-auto max-w-5xl px-4 py-12">
+    <h2 id="services" class="text-3xl font-bold">Services</h2>
+    <ul class="mt-6 grid gap-6 sm:grid-cols-2">
+      {
+        services.map((s) => (
+          <li class="rounded-lg border border-slate-200 p-6 hover:border-brand-600">
+            <h3 class="text-xl font-semibold">
+              <a href={`/services/${s.id}`} class="hover:text-brand-700">
+                {s.data.title}
+              </a>
+            </h3>
+            <p class="mt-2 text-slate-700">{s.data.accroche}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="pourquoi" class="bg-slate-50">
+    <div class="mx-auto max-w-5xl px-4 py-12">
+      <h2 id="pourquoi" class="text-3xl font-bold">Un triple ancrage : technique, opérations, juridique</h2>
+      <p class="mt-4 max-w-3xl text-slate-700">
+        D2matic est la micro-entreprise de {PERSON.name}, consultant en automatisation no-code et low-code.
+      </p>
+      <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+        <li class="rounded-lg bg-white p-5 shadow-sm">
+          <h3 class="font-semibold">Make Expert Partner</h3>
+        </li>
+        <li class="rounded-lg bg-white p-5 shadow-sm">
+          <h3 class="font-semibold">Ingénieur Grenoble INP ENSE3</h3>
+        </li>
+        <li class="rounded-lg bg-white p-5 shadow-sm">
+          <h3 class="font-semibold">Titre RNCP niveau 6 Product Builder (École Cube Paris)</h3>
+        </li>
+        <li class="rounded-lg bg-white p-5 shadow-sm">
+          <h3 class="font-semibold">Ancien Directeur des Opérations et DPO</h3>
+          <p class="mt-1 text-slate-700">Conception d’automatisations conformes RGPD.</p>
+        </li>
+      </ul>
+      {
+        sameAs.length > 0 && (
+          <ul class="mt-6 flex flex-wrap gap-4 text-sm">
+            {sameAs.map((url) => (
+              <li>
+                <a class="text-brand-700 underline" href={url} rel="noopener me">
+                  {new URL(url).hostname.replace(/^www\./, '')}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      <p class="mt-6">
+        <a href="/a-propos" class="font-semibold text-brand-700 underline">En savoir plus sur {PERSON.name}</a>
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="outils" class="mx-auto max-w-5xl px-4 py-12">
+    <h2 id="outils" class="text-3xl font-bold">Outils</h2>
+    <ul class="mt-6 flex flex-wrap gap-3">
+      {SITE.tools.map((t) => <li class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium">{t}</li>)}
+    </ul>
+  </section>
+
+  {
+    cas.length > 0 && (
+      <section aria-labelledby="cas" class="mx-auto max-w-5xl px-4 py-12">
+        <h2 id="cas" class="text-3xl font-bold">Cas clients</h2>
+        <ul class="mt-6 grid gap-6 sm:grid-cols-2">
+          {cas.map((c) => (
+            <li class="rounded-lg border border-slate-200 p-6">
+              <h3 class="text-xl font-semibold">
+                <a href={`/cas-clients/${c.id}`} class="hover:text-brand-700">
+                  {c.data.title}
+                </a>
+              </h3>
+              <p class="mt-2 text-slate-700">{c.data.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section aria-labelledby="contact" class="mx-auto max-w-5xl px-4 py-12">
+    <div class="rounded-xl bg-brand-800 px-6 py-10 text-white sm:px-10">
+      <h2 id="contact" class="text-3xl font-bold">Un processus à automatiser ?</h2>
+      <p class="mt-3 max-w-2xl text-brand-100">Décrivez votre besoin, je vous réponds par e-mail.</p>
+      <a href="/contact" class="mt-6 inline-block rounded-md bg-white px-5 py-3 font-semibold text-brand-800 hover:bg-brand-50">
+        Me contacter
+      </a>
+    </div>
+  </section>
+</BaseLayout>

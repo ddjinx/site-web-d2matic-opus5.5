@@ -1,0 +1,45 @@
+---
+/**
+ * Liste des articles, servie à /blog. Générée uniquement s'il existe au moins
+ * un article publié : pas de page vide indexée tant que le blog est vide.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getPublished, isoDate } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const posts = (await getPublished('blog')).sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf());
+  return posts.length ? [{ params: { index: undefined }, props: { posts } }] : [];
+}) satisfies GetStaticPaths;
+
+const { posts } = Astro.props;
+---
+
+<BaseLayout
+  title="Blog : automatisation no-code et low-code"
+  description="Articles de David Dupont (D2matic) sur l'automatisation no-code et low-code, Make, n8n et la conformité RGPD des automatisations."
+  breadcrumbs={[{ name: 'Blog', href: '/blog' }]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <h1 class="text-4xl font-bold tracking-tight">Blog : automatisation no-code et low-code</h1>
+    <ul class="mt-8 space-y-8">
+      {
+        posts.map((p) => (
+          <li>
+            <article>
+              <h2 class="text-2xl font-semibold">
+                <a href={`/blog/${p.id}`} class="hover:text-brand-700">
+                  {p.data.title}
+                </a>
+              </h2>
+              <p class="mt-1 text-sm text-slate-600">
+                <time datetime={isoDate(p.data.publishedDate)}>{formatDate(p.data.publishedDate)}</time>
+              </p>
+              <p class="mt-2 text-slate-700">{p.data.description}</p>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>

@@ -1,0 +1,77 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Faq from '../../components/Faq.astro';
+import { formatDate, getPublished, isoDate } from '../../lib/content';
+import { faqPage } from '../../lib/schema';
+
+export const getStaticPaths = (async () => {
+  const cases = await getPublished('cas-clients');
+  return cases.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const path = `/cas-clients/${entry.id}`;
+const services = (await getPublished('services')).filter((s) => data.services.includes(s.id));
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  seoTitle={data.seoTitle}
+  canonical={data.canonical}
+  noindex={data.noindex}
+  ogType="article"
+  ogImage={data.image?.src}
+  breadcrumbs={[
+    { name: 'Cas clients', href: '/cas-clients' },
+    { name: data.title, href: path },
+  ]}
+  schema={faqPage(data.faq)}
+>
+  <article class="mx-auto max-w-3xl px-4 py-10">
+    <header>
+      <h1 class="text-4xl font-bold tracking-tight">{data.title}</h1>
+      <dl class="mt-6 grid gap-4 rounded-lg bg-slate-50 p-5 text-sm sm:grid-cols-3">
+        <div><dt class="text-slate-600">Client</dt><dd class="font-semibold">{data.client}</dd></div>
+        <div><dt class="text-slate-600">Secteur</dt><dd class="font-semibold">{data.secteur}</dd></div>
+        <div><dt class="text-slate-600">Outils</dt><dd class="font-semibold">{data.outils.join(', ')}</dd></div>
+      </dl>
+      <p class="mt-4 text-sm text-slate-600">
+        Publié le <time datetime={isoDate(data.publishedDate)}>{formatDate(data.publishedDate)}</time>
+        {
+          data.updatedDate && (
+            <>
+              · Mis à jour le <time datetime={isoDate(data.updatedDate)}>{formatDate(data.updatedDate)}</time>
+            </>
+          )
+        }
+      </p>
+    </header>
+    {data.image && <Image src={data.image} alt={data.imageAlt ?? ''} class="mt-8 rounded-lg" widths={[400, 800, 1200]} sizes="(min-width: 768px) 768px, 100vw" />}
+    <div class="prose prose-slate mt-8 max-w-none prose-a:text-brand-700">
+      <Content />
+    </div>
+    <Faq faq={data.faq} />
+    {
+      services.length > 0 && (
+        <section aria-labelledby="services-lies" class="mt-12">
+          <h2 id="services-lies" class="text-2xl font-bold">Services mobilisés</h2>
+          <ul class="mt-3 list-disc pl-5">
+            {services.map((s) => (
+              <li>
+                <a href={`/services/${s.id}`} class="text-brand-700 underline">
+                  {s.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

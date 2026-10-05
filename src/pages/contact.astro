@@ -1,0 +1,73 @@
+---
+/**
+ * Formulaire HTML pur (zéro JS) posté directement vers un webhook Make.
+ * URL lue au build dans la variable d'environnement PUBLIC_CONTACT_WEBHOOK, jamais en dur.
+ * Le scénario Make doit répondre par une redirection 303 vers https://d2matic.fr/contact/merci (voir README).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
+
+const webhook = import.meta.env.PUBLIC_CONTACT_WEBHOOK as string | undefined;
+const configured = typeof webhook === 'string' && /^https:\/\//.test(webhook);
+const input =
+  'mt-1 block w-full rounded-md border border-slate-400 px-3 py-2 text-ink focus:border-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Contactez D2matic, consultant en automatisation no-code et low-code : décrivez votre besoin via le formulaire ou par e-mail à contact@d2matic.fr."
+  breadcrumbs={[{ name: 'Contact', href: '/contact' }]}
+>
+  <div class="mx-auto max-w-2xl px-4 py-10">
+    <h1 class="text-4xl font-bold tracking-tight">Contact</h1>
+    <p class="mt-4 text-slate-700">
+      Décrivez votre besoin via ce formulaire, ou écrivez directement à
+      <a class="text-brand-700 underline" href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+    </p>
+
+    {
+      !configured && (
+        <p role="status" class="placeholder mt-6 block p-3">
+          [CONFIGURATION : variable d'environnement PUBLIC_CONTACT_WEBHOOK absente au build. Le formulaire est désactivé.]
+        </p>
+      )
+    }
+
+    <form method="post" action={configured ? webhook : undefined} class="mt-8 space-y-5" accept-charset="UTF-8">
+      <fieldset disabled={!configured} class="space-y-5">
+        <legend class="sr-only">Votre demande</legend>
+        <div>
+          <label for="nom" class="font-medium">Nom <span aria-hidden="true">*</span></label>
+          <input id="nom" name="nom" type="text" required autocomplete="name" maxlength="120" class={input} />
+        </div>
+        <div>
+          <label for="email" class="font-medium">E-mail professionnel <span aria-hidden="true">*</span></label>
+          <input id="email" name="email" type="email" required autocomplete="email" maxlength="200" class={input} />
+        </div>
+        <div>
+          <label for="entreprise" class="font-medium">Entreprise (facultatif)</label>
+          <input id="entreprise" name="entreprise" type="text" autocomplete="organization" maxlength="200" class={input} />
+        </div>
+        <div>
+          <label for="message" class="font-medium">Votre besoin <span aria-hidden="true">*</span></label>
+          <textarea id="message" name="message" required rows="7" maxlength="5000" class={input}></textarea>
+        </div>
+        <!-- Pot de miel anti-spam : champ invisible, doit rester vide. Le scénario Make ignore les envois où il est rempli. -->
+        <div class="hidden" aria-hidden="true">
+          <label for="site_web">Ne pas remplir ce champ</label>
+          <input id="site_web" name="site_web" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <p class="text-sm text-slate-600">* Champs obligatoires.</p>
+        <button type="submit" class="rounded-md bg-brand-700 px-5 py-3 font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
+          Envoyer
+        </button>
+      </fieldset>
+    </form>
+
+    <p class="mt-8 text-sm text-slate-600">
+      Les informations saisies servent uniquement à répondre à votre demande. Elles sont transmises à D2matic via la plateforme
+      d'automatisation Make. Aucun cookie ni traceur n'est utilisé sur ce site. Détails et exercice de vos droits :
+      <a class="text-brand-700 underline" href="/confidentialite">politique de confidentialité</a>.
+    </p>
+  </div>
+</BaseLayout>

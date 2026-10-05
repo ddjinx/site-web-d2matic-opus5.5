@@ -1,0 +1,64 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AuthorBox from '../../components/AuthorBox.astro';
+import Faq from '../../components/Faq.astro';
+import { PERSON } from '../../config/site';
+import { formatDate, getPublished, isoDate } from '../../lib/content';
+import { article, faqPage } from '../../lib/schema';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPublished('blog');
+  return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const path = `/blog/${entry.id}`;
+const updated = data.updatedDate ?? data.publishedDate;
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  seoTitle={data.seoTitle}
+  canonical={data.canonical}
+  noindex={data.noindex}
+  ogType="article"
+  ogImage={data.image?.src}
+  publishedTime={data.publishedDate}
+  modifiedTime={updated}
+  breadcrumbs={[
+    { name: 'Blog', href: '/blog' },
+    { name: data.title, href: path },
+  ]}
+  schema={[article(data, path, data.image?.src), ...faqPage(data.faq)]}
+>
+  <article class="mx-auto max-w-3xl px-4 py-10">
+    <header>
+      <h1 class="text-4xl font-bold tracking-tight">{data.title}</h1>
+      <p class="mt-4 text-sm text-slate-600">
+        Par <a href="/a-propos" class="underline">{PERSON.name}</a> · Publié le
+        <time datetime={isoDate(data.publishedDate)}>{formatDate(data.publishedDate)}</time> · Mis à jour le
+        <time datetime={isoDate(updated)}>{formatDate(updated)}</time>
+      </p>
+    </header>
+    {
+      data.resume && (
+        <aside aria-label="Résumé" class="mt-6 rounded-lg border-l-4 border-brand-600 bg-brand-50 p-5">
+          <p class="font-semibold text-brand-900">En résumé</p>
+          <p class="mt-1 text-slate-800">{data.resume}</p>
+        </aside>
+      )
+    }
+    {data.image && <Image src={data.image} alt={data.imageAlt ?? ''} class="mt-8 rounded-lg" widths={[400, 800, 1200]} sizes="(min-width: 768px) 768px, 100vw" />}
+    <div class="prose prose-slate mt-8 max-w-none prose-a:text-brand-700">
+      <Content />
+    </div>
+    <Faq faq={data.faq} />
+    <AuthorBox />
+  </article>
+</BaseLayout>

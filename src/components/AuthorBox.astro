@@ -1,0 +1,24 @@
+---
+import { PERSON, hasUrl } from '../config/site';
+import Placeholder from './Placeholder.astro';
+---
+
+<aside aria-label="À propos de l'auteur" class="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-5">
+  <p class="text-sm text-slate-600">Écrit par</p>
+  <p class="text-lg font-semibold">{PERSON.name}</p>
+  <p class="text-slate-700">{PERSON.jobTitle}, fondateur de D2matic</p>
+  <ul class="mt-2 flex flex-wrap gap-4 text-sm">
+    <li><a class="text-brand-700 underline" href="/a-propos">En savoir plus sur l'auteur</a></li>
+    <li>
+      {
+        hasUrl(PERSON.linkedin) ? (
+          <a class="text-brand-700 underline" href={PERSON.linkedin} rel="noopener me">
+            Profil LinkedIn
+          </a>
+        ) : (
+          <Placeholder text="URL du profil LinkedIn (src/config/site.ts)" />
+        )
+      }
+    </li>
+  </ul>
+</aside>

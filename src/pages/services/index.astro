@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublished } from '../../lib/content';
+
+const services = (await getPublished('services')).sort((a, b) => a.data.ordre - b.data.ordre);
+---
+
+<BaseLayout
+  title="Services d'automatisation no-code et low-code"
+  description="Les services de D2matic, consultant en automatisation no-code et low-code et Make Expert Partner, pour TPE, PME, agences et équipes opérationnelles d'ETI."
+  breadcrumbs={[{ name: 'Services', href: '/services' }]}
+>
+  <div class="mx-auto max-w-5xl px-4 py-10">
+    <h1 class="text-4xl font-bold tracking-tight">Services d'automatisation no-code et low-code</h1>
+    <ul class="mt-8 grid gap-6 sm:grid-cols-2">
+      {
+        services.map((s) => (
+          <li class="rounded-lg border border-slate-200 p-6 hover:border-brand-600">
+            <h2 class="text-xl font-semibold">
+              <a href={`/services/${s.id}`} class="hover:text-brand-700">
+                {s.data.title}
+              </a>
+            </h2>
+            <p class="mt-2 text-slate-700">{s.data.accroche}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>

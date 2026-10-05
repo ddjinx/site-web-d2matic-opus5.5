@@ -1,0 +1,83 @@
+---
+/** Pages simples issues de src/content/pages : /a-propos, /mentions-legales, /confidentialite… */
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Faq from '../components/Faq.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { PERSON, SITE, hasUrl } from '../config/site';
+import { formatDate, getPublished, isoDate } from '../lib/content';
+import { faqPage, profilePage } from '../lib/schema';
+
+export const getStaticPaths = (async () => {
+  const pages = await getPublished('pages');
+  return pages.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const path = `/${entry.id}`;
+const isProfile = data.type === 'profil';
+const sameAs = PERSON.sameAs.filter(hasUrl);
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  seoTitle={data.seoTitle}
+  canonical={data.canonical}
+  noindex={data.noindex}
+  ogType={isProfile ? 'profile' : 'website'}
+  breadcrumbs={[{ name: data.title, href: path }]}
+  schema={[...(isProfile ? [profilePage(path, data.updatedDate)] : []), ...faqPage(data.faq)]}
+>
+  <article class="mx-auto max-w-3xl px-4 py-10">
+    <h1 class="text-4xl font-bold tracking-tight">{data.title}</h1>
+    {
+      isProfile && (
+        <section aria-label="Identité" class="mt-8 flex flex-col gap-6 rounded-lg border border-slate-200 p-6 sm:flex-row">
+          <div class="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-slate-100 p-3 text-center text-xs">
+            <Placeholder text="photo réelle de David Dupont (src/assets/), affichée avec <Image>" />
+          </div>
+          <div>
+            <p class="text-xl font-semibold">{PERSON.name}</p>
+            <p class="text-slate-700">
+              {PERSON.jobTitle}, fondateur de {SITE.name}
+            </p>
+            <ul class="mt-3 list-disc space-y-1 pl-5 text-slate-700">
+              {PERSON.credentials.map((c) => (
+                <li>{c}</li>
+              ))}
+            </ul>
+            <ul class="mt-3 flex flex-wrap gap-4 text-sm">
+              <li>
+                <a class="text-brand-700 underline" href={`mailto:${SITE.email}`}>
+                  {SITE.email}
+                </a>
+              </li>
+              {sameAs.map((url) => (
+                <li>
+                  <a class="text-brand-700 underline" href={url} rel="noopener me">
+                    {new URL(url).hostname.replace(/^www\./, '')}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+    <div class="prose prose-slate mt-8 max-w-none prose-a:text-brand-700">
+      <Content />
+    </div>
+    <Faq faq={data.faq} />
+    {
+      data.updatedDate && (
+        <p class="mt-10 text-sm text-slate-600">
+          Dernière mise à jour : <time datetime={isoDate(data.updatedDate)}>{formatDate(data.updatedDate)}</time>
+        </p>
+      )
+    }
+  </article>
+</BaseLayout>

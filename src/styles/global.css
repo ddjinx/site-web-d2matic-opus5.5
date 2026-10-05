@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --color-brand-50: #eef6ff;
+  --color-brand-100: #d9eaff;
+  --color-brand-600: #1d5fd6;
+  --color-brand-700: #1a4cad;
+  --color-brand-800: #193f88;
+  --color-brand-900: #142f63;
+  --color-ink: #0f172a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Placeholders [À RÉDIGER : …] : doivent rester visibles tant qu'ils ne sont pas remplacés. */
+.placeholder {
+  background: #fef3c7;
+  color: #78350f;
+  outline: 1px dashed #b45309;
+  padding: 0 0.25rem;
+  border-radius: 0.125rem;
+}

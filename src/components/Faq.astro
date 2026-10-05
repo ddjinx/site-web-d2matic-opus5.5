@@ -1,0 +1,24 @@
+---
+interface Props {
+  faq?: { question: string; reponse: string }[];
+}
+const { faq } = Astro.props;
+---
+
+{
+  faq?.length ? (
+    <section aria-labelledby="faq" class="mt-12">
+      <h2 id="faq" class="text-2xl font-bold">Questions fréquentes</h2>
+      <dl class="mt-4 space-y-6">
+        {faq.map((f) => (
+          <div>
+            <dt>
+              <h3 class="text-lg font-semibold">{f.question}</h3>
+            </dt>
+            <dd class="mt-1 text-slate-700">{f.reponse}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  ) : null
+}

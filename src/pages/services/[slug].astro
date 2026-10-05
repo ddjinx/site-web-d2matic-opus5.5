@@ -1,0 +1,59 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Faq from '../../components/Faq.astro';
+import { getPublished } from '../../lib/content';
+import { faqPage, service } from '../../lib/schema';
+
+export const getStaticPaths = (async () => {
+  const services = await getPublished('services');
+  return services.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const path = `/services/${entry.id}`;
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  seoTitle={data.seoTitle}
+  canonical={data.canonical}
+  noindex={data.noindex}
+  ogImage={data.image?.src}
+  breadcrumbs={[
+    { name: 'Services', href: '/services' },
+    { name: data.title, href: path },
+  ]}
+  schema={[service(data, path), ...faqPage(data.faq)]}
+>
+  <article class="mx-auto max-w-3xl px-4 py-10">
+    <header>
+      <h1 class="text-4xl font-bold tracking-tight">{data.title}</h1>
+      <p class="mt-4 text-lg text-slate-700">{data.accroche}</p>
+      {
+        data.outils.length > 0 && (
+          <ul class="mt-4 flex flex-wrap gap-2" aria-label="Outils">
+            {data.outils.map((o) => (
+              <li class="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-800">{o}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+    {data.image && <Image src={data.image} alt={data.imageAlt ?? ''} class="mt-8 rounded-lg" widths={[400, 800, 1200]} sizes="(min-width: 768px) 768px, 100vw" />}
+    <div class="prose prose-slate mt-8 max-w-none prose-a:text-brand-700">
+      <Content />
+    </div>
+    <Faq faq={data.faq} />
+    <p class="mt-12">
+      <a href="/contact" class="inline-block rounded-md bg-brand-700 px-5 py-3 font-semibold text-white hover:bg-brand-800">
+        Parler de votre projet
+      </a>
+    </p>
+  </article>
+</BaseLayout>
