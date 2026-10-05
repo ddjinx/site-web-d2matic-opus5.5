@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { readFileSync, readdirSync } from 'node:fs';
+import checkLinks from './src/integrations/check-links.mjs';
 
 // Domaine canonique unique : https, sans www. Utilisé partout (canonical, sitemap, JSON-LD, llms.txt).
 export const SITE_URL = 'https://d2matic.fr';
@@ -40,6 +41,8 @@ export default defineConfig({
     sitemap({
       filter: (page) => !EXCLUDED.includes(new URL(page).pathname.replace(/\/$/, '') || '/'),
     }),
+    // En dernier : vérifie les liens internes de la sortie finale.
+    checkLinks({ site: SITE_URL }),
   ],
   vite: {
     plugins: [tailwindcss()],
